@@ -24,7 +24,6 @@ exports.getWeather = async (req, res) => {
         .status(err.response.status)
         .json({ message: err.response.data?.error?.message || 'WeatherAPI error' });
     }
-    // Network / other
     return res.status(502).json({ message: 'Unable to fetch weather data' });
   }
 };

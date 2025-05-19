@@ -9,8 +9,11 @@ const subscriptionRouter = require('./routes/subscription');
 const weatherRouter      = require('./routes/weather');
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ——— swagger-jsdoc setup —————————————————————————————
 const swaggerOptions = {
@@ -39,14 +42,12 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', subscriptionRouter);
 app.use('/api/weather', weatherRouter);
 
-// Redirect root → docs
+app.get('/subscribe', (_req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 app.get('/', (_req, res) => res.redirect('/docs'));
 
-sequelize.authenticate()
-  .then(() => console.log('✅ Database connected'))
-  .catch(err => console.error('❌ DB connection error:', err));
-
 const port = process.env.PORT || 3000;
-app.listen(port, () =>
-  console.log(`🚀 Server listening on http://localhost:${port}`)
-);
+
+module.exports = app;

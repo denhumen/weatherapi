@@ -4,14 +4,12 @@ services:
     build: .
     ports:
       - '3000:3000'
-    environment:
-      WEATHER_API_KEY: 8f7ad949f73144f89ac184125251905
     depends_on:
       - db
     command: >
       sh -c "
         npx sequelize-cli db:migrate &&
-        node src/app.js
+        node src/server.js
       "
 
   db:

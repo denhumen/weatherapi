@@ -1,184 +1,121 @@
-# Weather API Service
+# Weather API
 
-This service provides:
+A Node.js service that lets users subscribe by email to regular weather updates for a chosen city
 
-- **Current weather** lookup via WeatherAPI.com
-- **Email subscription** for weather updates (hourly or daily) with confirm/unsubscribe workflows
-- **Interactive API documentation** powered by Swagger UI
-
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Configuration](#configuration)
-- [Running with Docker](#running-with-docker)
-- [Running Locally](#running-locally)
-- [API Endpoints](#api-endpoints)
-  - GET /api/weather?city={city}
-  - POST /api/subscribe
-  - GET /api/confirm/{token}
-  - GET /api/unsubscribe/{token}
-- [Swagger UI](#swagger-ui)
-- [Database Migrations](#database-migrations)
-- [Validation & Error Handling](#validation--error-handling)
-
----
+*Built with: Express, Sequelize (PostgreSQL), lightweight scheduler for dispatching emails*
 
 ## Features
 
-1. **Weather Lookup**: Fetches real-time weather data (temperature, humidity, description) from WeatherAPI.com.
-2. **Subscriptions**: Users can subscribe with an email, city, and frequency (hourly or daily).
-3. **Confirmation Flow**: Subscriptions require confirmation via a unique token URL.
-4. **Unsubscribe Flow**: Automatic unsubscribe link in updates.
-5. **Swagger Documentation**: Auto-generated from JSDoc comments with swagger-jsdoc and served at /docs.
-6. **Input Validation**: All endpoints validate parameters and return 400 on bad input.
+- **REST API** with Swagger/OpenAPI documentation
+- **Separation of concerns**: controllers, models, routes, scheduler, services
+- **Database persistence** via Sequelize and migrations
+- **Email delivery** using Nodemailer
+- **Scheduler** (node-cron) for periodic email dispatch
+- **Validation and error handling**
+- **Automated tests** (Jest + Supertest)
+- **Docker** and **docker-compose** for containerized deployment
 
----
+## Quickstart
 
-## Prerequisites
+1. **Clone the repo**  
+```bash
+git clone https://github.com/your-username/weather-api.git && cd weather-api
+```
 
-- Docker & Docker Compose
-- Node.js v18+ (if running locally)
-- PostgreSQL (handled in Docker Compose)
-- WeatherAPI.com API Key
+2. **Create `.env`** at project root:
 
----
-
-## Configuration
-
-Copy .env.example to .env and fill in values:
-
+```
+PORT=3030
+BASE_URL=http://localhost:3030
+WEATHER_API_KEY=<your-weatherapi-key>
 DB_HOST=db
 DB_NAME=weatherdb
 DB_USER=postgres
 DB_PASSWORD=postgres
-WEATHER_API_KEY=<your_weatherapi_key>
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=apikey
+SMTP_PASS=<your-api-from-smpt>
+EMAIL_FROM=<your-email-from-smpt>
+```
 
-> Note: Docker Compose will load this file by default.
 
----
+3. **Install dependencies**  
+```bash
+npm ci
+```
 
-## Running with Docker
+4. **Run locally**  
+```bash
+npm run dev
+```
 
-1. Build and start containers:
+- API: `http://localhost:3030/api/...`  
+- Docs (Swagger UI): `http://localhost:3030/docs`  
+- Subscription form: `http://localhost:3030/subscribe`
 
-   docker-compose up --build -d
+5. **Run tests**  
+```bash
+npm test
+```
 
-2. tail logs (optional):
+## Docker
 
-   docker-compose logs -f app
+Built for production in a docker container
 
-3. Access:
-   - API: http://localhost:3000/api/...
-   - Docs: http://localhost:3000/docs
+1. **Build and run**  
+```bash
+docker-compose up --build
+```
 
----
+2. **Services**  
+- **app**: Node.js server + migrations  
+- **db**: PostgreSQL with persistent volume
 
-## Running Locally (without Docker)
+3. **Access**  
+- API & form: `http://localhost:3000`
+- Swagger UI: `http://localhost:3000/docs`
 
-1. Install dependencies:
+## Architecture
 
-   npm install
-
-2. Run migrations:
-
-   npm run migrate
-
-3. Start the server:
-
-   npm run dev
-
-4. Visit docs: http://localhost:3000/docs
-
----
+- **src/app.js** – express main app setup
+- **src/server.js** – database authentication and app starting + scheduler import
+- **src/routes/** – "weather" and "subscription" routers
+- **src/controllers/** – controllers for handling incoming requests
+- **src/models/** – sequelize model definitions and index
+- **src/migrations/** – sequelize migrations for schema setup
+- **src/scheduler.js** – cron job that fetches weather and sends emails according to Frequency of subsciber
+- **public/** – static assets (HTML form, CSS, JS)
 
 ## API Endpoints
 
-### Weather
+- **GET** `/api/weather?city={city}`  
+Returns `{ temperature, humidity, description }`
 
-#### GET /api/weather?city={city}
+- **POST** `/api/subscribe`  
+Body: `{ email, city, frequency }`  
+Response: confirmation message or errors
 
-- Description: Get current weather for a given city.
-- Query Params:
-  - city (string, required)
-- Response (200):
+- **GET** `/api/confirm/{token}`  
+Confirms an email subscription
 
-  {
-    "temperature": 20.5,
-    "humidity": 55,
-    "description": "Partly cloudy"
-  }
+- **GET** `/api/unsubscribe/{token}`  
+Unsubscribes a user
 
-- Errors:
-  - 400 if city is missing
-  - 502 if upstream WeatherAPI.com call fails
+## Testing
 
-### Subscriptions
+- **Validation tests** in `tests/` use Jest + Supertest
+- Run with `npm test` (uses in-memory SQLite for isolation)
 
-#### POST /api/subscribe
+## Environment Variables
 
-- Description: Subscribe an email to weather updates.
-- Body (application/json):
+- `PORT` – server port (default 3000)
+- `BASE_URL` – public URL for links in emails
+- `WEATHER_API_KEY` – API key for WeatherAPI.com
+- **PostgreSQL**  
+- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+- **SMTP**  
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
 
-  {
-    "email": "user@example.com",
-    "city": "Kyiv",
-    "frequency": "daily"
-  }
-
-- Responses:
-  - 201 on success (returns confirmation message)
-  - 400 on validation error
-  - 409 if email already subscribed
-
-#### GET /api/confirm/{token}
-
-- Description: Confirm a subscription using the token.
-- Path Params:
-  - token (UUID, required)
-- Responses:
-  - 200 on successful confirmation
-  - 400 on invalid token format
-  - 404 if token not found
-
-#### GET /api/unsubscribe/{token}
-
-- Description: Unsubscribe using the token.
-- Path Params:
-  - token (UUID, required)
-- Responses:
-  - 200 on successful unsubscribe
-  - 400 on invalid token format
-  - 404 if token not found
-
----
-
-## Swagger UI
-
-Interactive docs are available at:
-
-http://localhost:3000/docs
-
-Generated from JSDoc in src/routes/*.js.
-
----
-
-## Database Migrations
-
-We use Sequelize CLI to manage schema.
-
-- Migrations live in src/migrations
-- Run:
-```bash
-  npm run migrate
-```
-
----
-
-## Validation & Error Handling
-
-- All inputs are validated with express-validator.
-- Invalid inputs return 400 Bad Request with an errors array.
-- Controller errors are caught and return 500 Internal Server Error.
+## Hosting
