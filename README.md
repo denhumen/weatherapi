@@ -171,8 +171,9 @@ We use Sequelize CLI to manage schema.
 
 - Migrations live in src/migrations
 - Run:
-
+```bash
   npm run migrate
+```
 
 ---
 
@@ -181,7 +182,3 @@ We use Sequelize CLI to manage schema.
 - All inputs are validated with express-validator.
 - Invalid inputs return 400 Bad Request with an errors array.
 - Controller errors are caught and return 500 Internal Server Error.
-
----
-
-Happy coding! 🚀
