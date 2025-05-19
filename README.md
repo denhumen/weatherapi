@@ -4,6 +4,10 @@ A Node.js service that lets users subscribe by email to regular weather updates 
 
 *Built with: Express, Sequelize (PostgreSQL), lightweight scheduler for dispatching emails*
 
+Used third party services:
+- SMTP: https://sendgrid.com/en-us
+- WeatherAPI: https://www.weatherapi.com/
+
 ## Features
 
 - **REST API** with Swagger/OpenAPI documentation
@@ -47,40 +51,27 @@ EMAIL_FROM=<your-email-from-smpt>
 npm ci
 ```
 
-4. **Run locally**
+4. **Build and run with Docker**  
+```bash
+docker-compose up --build
+```
 
-### This service assumes you have PostgreSQL running locally. So without PostgreSQL it will fail. Use docker for convinient setup
+- API: `http://localhost:3030/api/...`  
+- Docs (Swagger UI): `http://localhost:3030/docs`  
+- Subscription form: `http://localhost:3030`
+
+5. **Run locally**
+
+#### ⚠️ Local run assumes you have PostgreSQL running. So without PostgreSQL it will fail. Use docker for convinient setup. Also for the local setup enviromental variables will be different. For now they set up for Docker running
 
 ```bash
 npm run dev
 ```
 
-- API: `http://localhost:3030/api/...`  
-- Docs (Swagger UI): `http://localhost:3030/docs`  
-- Subscription form: `http://localhost:3030/subscribe`
-
 5. **Run tests**  
 ```bash
 npm test
 ```
-
-## Docker
-
-Built for production in a docker container
-
-1. **Build and run**  
-```bash
-docker-compose up --build
-```
-
-2. **Services**  
-- **app**: Node.js server + migrations  
-- **db**: PostgreSQL with persistent volume
-
-3. **Access**  
-- API & form: `http://localhost:3000`
-- Swagger UI: `http://localhost:3000/docs`
-- Subscription form: `http://localhost:3030/subscribe`
 
 ## Architecture
 
