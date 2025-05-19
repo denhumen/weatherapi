@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      WEATHER_API_KEY: 8f7ad949f73144f89ac184125251905
+    depends_on:
+      - db
+    command: >
+      sh -c "
+        npx sequelize-cli db:migrate &&
+        node src/app.js
+      "
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB:       weatherdb
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
