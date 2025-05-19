@@ -15,7 +15,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ——— swagger-jsdoc setup —————————————————————————————
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -37,7 +36,6 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-// ——————————————————————————————————————————————————————
 
 app.use('/api', subscriptionRouter);
 app.use('/api/weather', weatherRouter);

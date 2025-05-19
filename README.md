@@ -19,8 +19,9 @@ A Node.js service that lets users subscribe by email to regular weather updates 
 
 1. **Clone the repo**  
 ```bash
-git clone https://github.com/your-username/weather-api.git && cd weather-api
+git clone https://github.com/denhumen/weatherapi.git
 ```
+Then move to the cloned repo
 
 2. **Create `.env`** at project root:
 
@@ -46,7 +47,10 @@ EMAIL_FROM=<your-email-from-smpt>
 npm ci
 ```
 
-4. **Run locally**  
+4. **Run locally**
+
+### This service assumes you have PostgreSQL running locally. So without PostgreSQL it will fail. Use docker for convinient setup
+
 ```bash
 npm run dev
 ```
@@ -76,6 +80,7 @@ docker-compose up --build
 3. **Access**  
 - API & form: `http://localhost:3000`
 - Swagger UI: `http://localhost:3000/docs`
+- Subscription form: `http://localhost:3030/subscribe`
 
 ## Architecture
 
@@ -117,5 +122,3 @@ Unsubscribes a user
 - `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
 - **SMTP**  
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
-
-## Hosting

@@ -47,24 +47,25 @@ async function sendUpdate(sub) {
     }
 }
 
-// cron.schedule('0 * * * *', async () => {
-//   console.log('⏰ Running hourly job');
-//   const list = await Subscription.findAll({ where: { confirmed: true, frequency: 'hourly' }});
-//   await Promise.all(list.map(sendUpdate));
-// });
+cron.schedule('0 * * * *', async () => {
+  console.log('⏰ Running hourly job');
+  const list = await Subscription.findAll({ where: { confirmed: true, frequency: 'hourly' }});
+  await Promise.all(list.map(sendUpdate));
+});
 
-// cron.schedule('0 9 * * *', async () => {
-//   console.log('⏰ Running daily job');
-//   const list = await Subscription.findAll({ where: { confirmed: true, frequency: 'daily' }});
-//   await Promise.all(list.map(sendUpdate));
-// });
+cron.schedule('0 9 * * *', async () => {
+  console.log('⏰ Running daily job');
+  const list = await Subscription.findAll({ where: { confirmed: true, frequency: 'daily' }});
+  await Promise.all(list.map(sendUpdate));
+});
 
-cron.schedule('*/5 * * * *', async () => {
-    console.log('⏰ Running 5-min test job');
-    const subs = await Subscription.findAll({
-        where: { confirmed: true }
-    });
-    await Promise.all(subs.map(sendUpdate));
-});  
+// ONLY FOR TESTING:
+// cron.schedule('*/5 * * * *', async () => {
+//     console.log('⏰ Running 5-min test job');
+//     const subs = await Subscription.findAll({
+//         where: { confirmed: true }
+//     });
+//     await Promise.all(subs.map(sendUpdate));
+// });  
 
 console.log('✅ Scheduler started');
